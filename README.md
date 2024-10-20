@@ -58,5 +58,10 @@ Caso você tenha enviado as modificações corretamente, vá até o repositório
 
 ![alt text](image.png)
 
-Clique em `New pull request`
+Clique em `Compare & pull request`
 
+![alt text](image-1.png)
+
+Finalize clicando em `Create pull request`
+
+![alt text](image-2.png)
