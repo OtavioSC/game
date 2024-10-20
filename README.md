@@ -2,7 +2,7 @@
 
 Este repositório contém o projeto para o PI do 2 semestre
 
-### Como contribuir com o projeto
+## Como contribuir com o projeto
 
 #### Pré-requisitos
 - Git
@@ -56,12 +56,12 @@ git push -u origin feature/acao-tela-inicial
 #### 8. Crie a pull request
 Caso você tenha enviado as modificações corretamente, vá até o repositório do projeto e clique na aba de `Pull requests` conforme a imagem
 
-![alt text](image.png)
+![alt text](.github/assets/pull-requests-section.png)
 
 Clique em `Compare & pull request`
 
-![alt text](image-1.png)
+![alt text](.github/assets/create-pull-request.png)
 
 Finalize clicando em `Create pull request`
 
-![alt text](image-2.png)
+![alt text](.github/assets/pull-request-button.png)
