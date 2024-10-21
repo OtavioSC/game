@@ -56,16 +56,16 @@ int main() {
             break;
         }
         if (event.type == ALLEGRO_EVENT_KEY_DOWN) {  
-            if (event.keyboard.keycode == ALLEGRO_KEY_W) {
+            if (event.keyboard.keycode == ALLEGRO_KEY_W && PositionY >= 100) {
                 PositionY -= 5;
             }
-            else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
+            else if (event.keyboard.keycode == ALLEGRO_KEY_S && PositionY <= 400) {
                 PositionY += 5;
             }
-            else if (event.keyboard.keycode == ALLEGRO_KEY_D) {
+            else if (event.keyboard.keycode == ALLEGRO_KEY_D && PositionX <= 500) {
                 PositionX += 5;
             }
-            else if (event.keyboard.keycode == ALLEGRO_KEY_A) {
+            else if (event.keyboard.keycode == ALLEGRO_KEY_A && PositionX >= 100) {
                 PositionX -= 5;
             }
         Score++;
