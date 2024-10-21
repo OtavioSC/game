@@ -2,6 +2,41 @@
 
 Este repositório contém o projeto para o PI do 2 semestre
 
+## Como rodar o projeto
+
+### Linux
+
+#### Pré-requisitos
+- GCC 
+- Allegro5
+
+#### 1. Clone o repositório
+```
+git clone https://github.com/otaviosc/game
+```
+
+#### 2. Rode o comando de build
+```
+gcc Source.c -lallegro -lallegro_font lallegro_image
+```
+
+#### 3. Execute o arquivo de build
+```
+./a.out
+```
+
+### Windows
+
+#### Pré-requisitos
+- Visual Studio
+- Mingw 
+- Allegro5
+
+#### Recomendados seguir o tutorial abaixo:
+
+[Aprenda a criar jogos com Allegro C/C++ no Windows e Linux](https://www.youtube.com/watch?v=mJFYV8Hk6jY)
+
+
 ## Como contribuir com o projeto
 
 #### Pré-requisitos
@@ -66,4 +101,3 @@ Finalize clicando em `Create pull request`
 
 
 ![alt text](.github/assets/pull-request-button.png)
-
