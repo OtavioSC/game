@@ -3,7 +3,10 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_ttf.h>
 #include <allegro5/keyboard.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 
 int countdown_time = 50;
 int main() {
@@ -12,15 +15,21 @@ int main() {
     al_init_font_addon();
     al_install_keyboard();
     al_init_image_addon();
+    al_init_ttf_addon();
+    al_init_primitives_addon();
+    al_install_audio();
+    al_init_acodec_addon();
+    al_reserve_samples(1);
 
     ALLEGRO_DISPLAY* Display = al_create_display(1200, 880);
     al_set_window_position(Display, 200, 200);
 
-    // ALLEGRO_FONT* Font = al_load_font("/home/otso/.local/share/fonts/Poppins/Poppins-Medium.ttf", 36, 0);
-    ALLEGRO_FONT* Font = al_create_builtin_font();
+    ALLEGRO_FONT* Font = al_load_font("/home/otso/.local/share/fonts/Poppins/Poppins-Medium.ttf", 22, 0);
+    // ALLEGRO_FONT* Font = al_create_builtin_font();
     ALLEGRO_TIMER* Timer = al_create_timer(1.0 / 25.0);
     ALLEGRO_TIMER* Countdown_timer = al_create_timer(1.0);
 
+    ALLEGRO_SAMPLE* Sample = al_load_sample("./Assets/music/8bit.ogg");
     ALLEGRO_BITMAP* Sprite = al_load_bitmap("./Assets/sprites/dog.png");
     ALLEGRO_BITMAP* CatSprite = al_load_bitmap("./Assets/sprites/cat.png");
     ALLEGRO_EVENT_QUEUE* EventQueue = al_create_event_queue();
@@ -28,9 +37,6 @@ int main() {
     al_register_event_source(EventQueue, al_get_keyboard_event_source());
     al_register_event_source(EventQueue, al_get_timer_event_source(Timer));
     al_register_event_source(EventQueue, al_get_timer_event_source(Countdown_timer));
-
-    al_start_timer(Timer);
-    al_start_timer(Countdown_timer);
 
     float frame = 0.f;
     float cat_frame = 0.f;
@@ -45,12 +51,18 @@ int main() {
     char Countdown_Text[50] = { 0 };
     bool key[4] = { false, false, false, false};
     bool cat_key[4] = { false, false, false, false};
+    srand(time(NULL));
+
+    al_start_timer(Timer);
+    al_start_timer(Countdown_timer);
 
     while (true) {
         ALLEGRO_EVENT event;
         al_wait_for_event(EventQueue, &event);
 
         if (event.type == ALLEGRO_EVENT_TIMER) {
+            cat_current_frame_y = 32 * 7;
+            current_frame_y = 32 * 6;
             if (key[0] && PositionY >= 100){
                 frame += 0.3f;
                 current_frame_y = 32 * 2;
@@ -159,7 +171,6 @@ int main() {
                     cat_key[3] = true;
                     break;
             }
-        Score++;
              
         }
 
@@ -179,7 +190,7 @@ int main() {
         al_draw_bitmap_region(CatSprite, 32 * (int)cat_frame, cat_current_frame_y, 32, 32, cat_position_x, cat_position_y, 0);
         al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 30, 0, Score_Text);
         al_flip_display();
-
+        al_play_sample(Sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
         
         al_rest(0.01);
     }
@@ -189,6 +200,7 @@ int main() {
     al_destroy_event_queue(EventQueue);
     al_destroy_timer(Timer);
     al_destroy_bitmap(Sprite);
+    al_destroy_sample(Sample);
 
     return 0;
 }
