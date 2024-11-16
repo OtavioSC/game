@@ -32,6 +32,7 @@ int main() {
     ALLEGRO_SAMPLE* Sample = al_load_sample("./Assets/music/8bit.ogg");
     ALLEGRO_BITMAP* Sprite = al_load_bitmap("./Assets/sprites/dog.png");
     ALLEGRO_BITMAP* CatSprite = al_load_bitmap("./Assets/sprites/cat.png");
+    ALLEGRO_BITMAP* background = al_load_bitmap("./Assets/background.png");
     ALLEGRO_EVENT_QUEUE* EventQueue = al_create_event_queue();
     al_register_event_source(EventQueue, al_get_display_event_source(Display));
     al_register_event_source(EventQueue, al_get_keyboard_event_source());
@@ -185,6 +186,7 @@ int main() {
         snprintf(Score_Text, sizeof(Score_Text), "Score: %d", Score);
         snprintf(Countdown_Text, sizeof(Countdown_Text), "Timer: %d", countdown_time);
         al_clear_to_color(al_map_rgb(100, 100, 100));
+        al_draw_bitmap(background, 0, 0, 0);
         al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 50, 0,  Countdown_Text);
         al_draw_bitmap_region(Sprite, 32 * (int)frame, current_frame_y, 32, 32, PositionX, PositionY, 0);
         al_draw_bitmap_region(CatSprite, 32 * (int)cat_frame, cat_current_frame_y, 32, 32, cat_position_x, cat_position_y, 0);
@@ -200,6 +202,7 @@ int main() {
     al_destroy_event_queue(EventQueue);
     al_destroy_timer(Timer);
     al_destroy_bitmap(Sprite);
+    al_destroy_bitmap(background);
     al_destroy_sample(Sample);
 
     return 0;
