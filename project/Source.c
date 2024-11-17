@@ -8,6 +8,11 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 
+#define SCREEN_WIDTH 1200
+#define SCREEN_HEIGHT 880
+#define BORDER_WIDTH 250
+#define BORDER_HEIGHT 170
+
 int countdown_time = 50;
 int main() {
 
@@ -21,7 +26,7 @@ int main() {
     al_init_acodec_addon();
     al_reserve_samples(1);
 
-    ALLEGRO_DISPLAY* Display = al_create_display(1200, 880);
+    ALLEGRO_DISPLAY* Display = al_create_display(SCREEN_WIDTH, SCREEN_HEIGHT);
     al_set_window_position(Display, 200, 200);
 
     ALLEGRO_FONT* Font = al_load_font("/home/otso/.local/share/fonts/Poppins/Poppins-Medium.ttf", 22, 0);
@@ -39,10 +44,14 @@ int main() {
     al_register_event_source(EventQueue, al_get_timer_event_source(Timer));
     al_register_event_source(EventQueue, al_get_timer_event_source(Countdown_timer));
 
+    srand(time(NULL));
+    bool number_active = true;
+    float number_x = 600;
+    float number_y = 440;
     float frame = 0.f;
     float cat_frame = 0.f;
-    float PositionX = 200;
-    float PositionY = 200;
+    float PositionX = 500;
+    float PositionY = 500;
     float cat_position_x= 300;
     float cat_position_y= 300;
     float cat_current_frame_y = 160;
@@ -52,10 +61,10 @@ int main() {
     char Countdown_Text[50] = { 0 };
     bool key[4] = { false, false, false, false};
     bool cat_key[4] = { false, false, false, false};
-    srand(time(NULL));
 
     al_start_timer(Timer);
     al_start_timer(Countdown_timer);
+    int random_number = rand() % 10;
 
     while (true) {
         ALLEGRO_EVENT event;
@@ -64,46 +73,59 @@ int main() {
         if (event.type == ALLEGRO_EVENT_TIMER) {
             cat_current_frame_y = 32 * 7;
             current_frame_y = 32 * 6;
-            if (key[0] && PositionY >= 100){
+            if (key[0] && PositionY >= BORDER_HEIGHT){
                 frame += 0.3f;
                 current_frame_y = 32 * 2;
                 PositionY -= 3;
             }
-           if (key[1] && PositionY <= 400) {
+           if (key[1] && PositionY <= (SCREEN_HEIGHT - BORDER_HEIGHT) - 25) {
                 frame += 0.3f;
                 current_frame_y = 32 * 4;
                 PositionY += 3;
            }
-            if (key[2] && PositionX >= 100) {
+            if (key[2] && PositionX >= BORDER_WIDTH) {
                 frame += 0.3f;
                 current_frame_y = 32 * 9;
                 PositionX -= 3;
             }
-            if (key[3] && PositionX <= 500) {
+            if (key[3] && PositionX <= (SCREEN_WIDTH - BORDER_WIDTH) - 32) {
                 frame += 0.3f;
                 current_frame_y = 32 * 8;
                 PositionX += 3;
             }
 
-            if (cat_key[0] && cat_position_y >= 100){
+            if (cat_key[0] && cat_position_y >= BORDER_HEIGHT) {
                 cat_frame += 0.3f;
                 cat_current_frame_y = 32 * 2;
                 cat_position_y -= 3;
             }
-           if (cat_key[1] && cat_position_y <= 400) {
+           if (cat_key[1] && cat_position_y <= (SCREEN_HEIGHT - BORDER_HEIGHT) - 25) {
                 cat_frame += 0.3f;
                 cat_current_frame_y = 0;
                 cat_position_y += 3;
            }
-            if (cat_key[2] && cat_position_x >= 100) {
+            if (cat_key[2] && cat_position_x >= BORDER_WIDTH) {
                 cat_frame += 0.3f;
                 cat_current_frame_y = 32 * 3;
                 cat_position_x -= 3;
             }
-            if (cat_key[3] && cat_position_x <= 500) {
+            if (cat_key[3] && cat_position_x <= (SCREEN_WIDTH - BORDER_WIDTH) - 32 ) {
                 cat_frame += 0.3f;
                 cat_current_frame_y = 32;
                 cat_position_x += 3;
+            }
+
+            bool dog_collision =  PositionX < number_x  + 32 && PositionX + 32 > number_x &&
+            PositionY < number_y + 32 && PositionY + 32 > number_y;
+            bool cat_collision = cat_position_x < number_x  + 32 && cat_position_x + 32 > number_x &&
+            cat_position_y < number_y + 32 && cat_position_y + 32 > number_y;
+
+            
+            if (number_active && dog_collision || number_active && cat_collision) {
+                Score++;
+                number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 32 - BORDER_WIDTH + 1);
+                number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+                random_number = rand() % 10;
             }
 
             if (event.timer.source == Countdown_timer) {
@@ -187,6 +209,11 @@ int main() {
         snprintf(Countdown_Text, sizeof(Countdown_Text), "Timer: %d", countdown_time);
         al_clear_to_color(al_map_rgb(100, 100, 100));
         al_draw_bitmap(background, 0, 0, 0);
+        if (number_active) {
+            char number_text[2];
+            snprintf(number_text, sizeof(number_text), "%d", random_number);
+            al_draw_text(Font, al_map_rgb(255, 255, 255), number_x, number_y, ALLEGRO_ALIGN_CENTER, number_text); 
+        }
         al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 50, 0,  Countdown_Text);
         al_draw_bitmap_region(Sprite, 32 * (int)frame, current_frame_y, 32, 32, PositionX, PositionY, 0);
         al_draw_bitmap_region(CatSprite, 32 * (int)cat_frame, cat_current_frame_y, 32, 32, cat_position_x, cat_position_y, 0);
