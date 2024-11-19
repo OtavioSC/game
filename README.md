@@ -64,6 +64,22 @@ Clique em `Compare & pull request`
 
 Finalize clicando em `Create pull request`
 
-
 ![alt text](.github/assets/pull-request-button.png)
 
+------
+
+### Tarefas
+
+- [x] Alteração da sprite ao movimentar o personagem
+- [x] Adicionar background
+- [x] Aumentar o display
+- [x] Adicionar colisão com o cenário
+- [x] Adicionar segundo player
+- [ ] Adicionar menus
+- [x] Geração de números aleatórios
+- ⁠[x] Os players serem capazes de capturar esses números
+- ⁠[ ] Inserir os dados em uma operação
+- ⁠[x] Acumular pontos
+- [x] ⁠finalizar round
+- ⁠[ ] Ranking provavelmente online
+- [x] Extra: Adicionar sons/música
