@@ -14,13 +14,12 @@
 #define BORDER_WIDTH 250
 #define BORDER_HEIGHT 170
 
-int countdown_time = 50;
+int countdown_time = 60;
 
 int main() {
     al_init();
     al_init_font_addon();
     al_install_keyboard();
-    al_install_mouse();
     al_init_image_addon();
     al_init_ttf_addon();
     al_init_primitives_addon();
@@ -31,7 +30,7 @@ int main() {
     ALLEGRO_DISPLAY* Display = al_create_display(SCREEN_WIDTH, SCREEN_HEIGHT);
     al_set_window_position(Display, 200, 200);
 
-    ALLEGRO_FONT* Font = al_load_font("/home/otso/.local/share/fonts/Poppins/Poppins-Medium.ttf", 22, 0);
+    ALLEGRO_FONT* Font = al_load_font("./Assets/fonts/PixelOperator8-Bold.ttf", 20, 0);
     // ALLEGRO_FONT* Font = al_create_builtin_font();
     ALLEGRO_TIMER* Timer = al_create_timer(1.0 / 25.0);
     ALLEGRO_TIMER* Countdown_timer = al_create_timer(1.0);
@@ -48,6 +47,7 @@ int main() {
 
     srand(time(NULL));
     bool number_active = true;
+    bool number_active2 = true;
     float number_x = 600;
     float number_y = 440;
     float number_x2 = 800;
@@ -61,19 +61,20 @@ int main() {
     float cat_current_frame_y = 160;
     float current_frame_y = 160;
     int Score = 0;
-    int Goal = rand() % 10 + 1;
-    int random_number = rand() % 10 + 1;
-    int random_number2 = rand() % 10 + 1;
+    int Goal = rand() % 9 + 1;
+    int random_number = Goal;
+    int random_number2 = rand() % 9 + 1;
     char Score_Text[50] = { 0 };
-    char Countdown_Text[50] = { 0 };
+    char Countdown_Text[10] = { 0 };
     char Goal_Text[50] = { 0 };
     bool key[4] = { false, false, false, false};
     bool cat_key[4] = { false, false, false, false};
-
+    bool show_score_screen = false;
+    bool game_running = true;
     al_start_timer(Timer);
     al_start_timer(Countdown_timer);
 
-    while (true) {
+    while (game_running) {
         ALLEGRO_EVENT event;
         al_wait_for_event(EventQueue, &event);
 
@@ -127,24 +128,43 @@ int main() {
             bool dog_collision2 = PositionX < number_x2 + 20 && PositionX + 32 > number_x2 && PositionY < number_y2 + 20 && PositionY + 32 > number_y2;
             bool cat_collision2 = cat_position_x < number_x2 + 20 && cat_position_x + 32 > number_x2 && cat_position_y < number_y2 + 20 && cat_position_y + 32 > number_y2;
             
-            if (number_active && dog_collision || number_active && cat_collision || number_active && dog_collision2 || number_active && cat_collision2) {
-                if (Goal == random_number || Goal == random_number2) {
+            if (number_active && (dog_collision || cat_collision )) {
+                if (Goal == random_number) {
                     Score++;
+                    random_number = rand() % 9 + 1;
+                    Goal = random_number;
+                    random_number2 = rand() % 9 + 1;
+                    number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 32 - BORDER_WIDTH + 1);
+                    number_y2 = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
                 } else {
-                    Score = 0;
+                    Goal = rand() % 9 + 1;
+                    random_number = Goal;
                 }
                 number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 32 - BORDER_WIDTH + 1);
                 number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+            }
+
+            if(number_active2 && (dog_collision2 || cat_collision2)) {
+                if (Goal == random_number2) {
+                    Score++;
+                    random_number2 = rand() % 9 + 1;
+                    Goal = random_number2;
+                    random_number = rand() % 9 + 1;
+                    number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 32 - BORDER_WIDTH + 1);
+                    number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+                } else {
+                    Goal = rand() % 9 + 1;
+                    random_number2 = Goal;
+                }
                 number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 32 - BORDER_WIDTH + 1);
                 number_y2 = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
-                random_number = rand() % 10 + 1;
-                random_number2 = rand() % 10 + 1;
             }
 
             if (event.timer.source == Countdown_timer) {
                 countdown_time--;
                 if (countdown_time <= 0) {
-                    break;
+                    al_stop_timer(Countdown_timer);
+                    game_running = false;
                 }
             }
 
@@ -227,10 +247,12 @@ int main() {
         al_draw_bitmap(background, 0, 0, 0);
         if (number_active) {
             char number_text[2];
-            char number_text2[2];
             snprintf(number_text, sizeof(number_text), "%d", random_number);
             al_draw_text(Font, al_map_rgb(255, 255, 255), number_x, number_y, ALLEGRO_ALIGN_CENTER, number_text); 
+        }
 
+        if (number_active2) {
+            char number_text2[2];
             snprintf(number_text2, sizeof(number_text2), "%d", random_number2);
             al_draw_text(Font, al_map_rgb(255, 255, 255), number_x2, number_y2, ALLEGRO_ALIGN_CENTER, number_text2); 
         }
@@ -242,6 +264,22 @@ int main() {
         // al_play_sample(Sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
         al_flip_display(); 
         al_rest(0.01);
+    }
+
+    while (!game_running) {
+        ALLEGRO_EVENT event;
+        al_wait_for_event(EventQueue, &event);
+
+        al_clear_to_color(al_map_rgb(0, 0, 0));
+        char score_text[50];
+        snprintf(score_text, sizeof(score_text), "Final Score: %d", Score);
+        al_draw_text(Font, al_map_rgb(255, 255, 255), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, ALLEGRO_ALIGN_CENTER, score_text);
+        al_draw_text(Font, al_map_rgb(255, 255, 255), 620, 100, ALLEGRO_ALIGN_CENTER, "Press ESC to close the game");
+        al_flip_display();
+
+        if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {  
+            break;
+        }
     }
 
     al_destroy_display(Display);
