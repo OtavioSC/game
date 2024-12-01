@@ -45,6 +45,16 @@ Question generate_question() {
     return q;
 }
 
+void OptionsScreen(ALLEGRO_DISPLAY* Display, ALLEGRO_FONT* Font, ALLEGRO_BITMAP* BackGroundImage, int BgWidth, int BgHeight) {
+    al_draw_scaled_bitmap(BackGroundImage, 0, 0, BgWidth, BgHeight, 0, 0, 800, 600, 0); 
+    al_flip_display();
+}
+
+void StartScreen(ALLEGRO_DISPLAY* Display, ALLEGRO_FONT* Font, ALLEGRO_BITMAP* BackGroundImage, int BgWidth, int BgHeight) {
+    al_draw_scaled_bitmap(BackGroundImage, 0, 0, BgWidth, BgHeight, 0, 0, 800, 600, 0);
+    al_flip_display(); 
+}
+
 int main() {
     al_init();
     al_init_font_addon();
@@ -70,6 +80,9 @@ int main() {
     ALLEGRO_BITMAP* background = al_load_bitmap("./Assets/background.png");
     ALLEGRO_BITMAP* question_bg = al_load_bitmap("./Assets/question.png");
     ALLEGRO_BITMAP* hud = al_load_bitmap("./Assets/hud.png");
+    ALLEGRO_BITMAP* menu = al_load_bitmap("./Assets/menu.png");
+    ALLEGRO_BITMAP* options = al_load_bitmap("./Assets/settings.png");
+
     ALLEGRO_EVENT_QUEUE* EventQueue = al_create_event_queue();
     al_register_event_source(EventQueue, al_get_display_event_source(Display));
     al_register_event_source(EventQueue, al_get_keyboard_event_source());
