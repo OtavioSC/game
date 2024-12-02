@@ -14,7 +14,16 @@
 #define BORDER_WIDTH 250
 #define BORDER_HEIGHT 170
 
+bool game_running = true;
+bool bIsEndGame = false;
+bool bIsGame = false;
+bool bIsMenu = true;
+bool bIsOptions = false;
+bool bIsPlaySound = true;
+bool bIsTutorial = false;
 int countdown_time = 45;
+
+ALLEGRO_SAMPLE* Sample = NULL;
 
 typedef struct {
     int operand1;
@@ -44,15 +53,25 @@ Question generate_question() {
     }
     return q;
 }
-
-void OptionsScreen(ALLEGRO_DISPLAY* Display, ALLEGRO_FONT* Font, ALLEGRO_BITMAP* BackGroundImage, int BgWidth, int BgHeight) {
-    al_draw_scaled_bitmap(BackGroundImage, 0, 0, BgWidth, BgHeight, 0, 0, 800, 600, 0); 
-    al_flip_display();
+void initMusic() 
+{
+    if(Sample == NULL)
+    {
+        Sample = al_load_sample("./Assets/music/8bit.ogg");
+    }
+}
+void playMusic()
+{
+    if (Sample && bIsPlaySound) al_play_sample(Sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+    else
+    {
+        
+    }
 }
 
-void StartScreen(ALLEGRO_DISPLAY* Display, ALLEGRO_FONT* Font, ALLEGRO_BITMAP* BackGroundImage, int BgWidth, int BgHeight) {
-    al_draw_scaled_bitmap(BackGroundImage, 0, 0, BgWidth, BgHeight, 0, 0, 800, 600, 0);
-    al_flip_display(); 
+void stopMusic() 
+{
+    if (Sample) al_destroy_sample(Sample);
 }
 
 int main() {
@@ -65,7 +84,9 @@ int main() {
     al_install_audio();
     al_init_acodec_addon();
     al_reserve_samples(1);
+    al_install_mouse();
 
+    
     ALLEGRO_DISPLAY* Display = al_create_display(SCREEN_WIDTH, SCREEN_HEIGHT);
     al_set_window_position(Display, 200, 200);
 
@@ -74,10 +95,12 @@ int main() {
     ALLEGRO_TIMER* Timer = al_create_timer(1.0 / 25.0);
     ALLEGRO_TIMER* Countdown_timer = al_create_timer(1.0);
 
-    ALLEGRO_SAMPLE* Sample = al_load_sample("./Assets/music/8bit.ogg");
     ALLEGRO_BITMAP* Sprite = al_load_bitmap("./Assets/sprites/dog.png");
     ALLEGRO_BITMAP* CatSprite = al_load_bitmap("./Assets/sprites/cat.png");
-    ALLEGRO_BITMAP* background = al_load_bitmap("./Assets/background.png");
+    ALLEGRO_BITMAP* Menubackground = al_load_bitmap("./Assets/MenuScreen.png");
+    ALLEGRO_BITMAP* Gamebackground = al_load_bitmap("./Assets/background.png");
+    ALLEGRO_BITMAP* Optionsbackground = al_load_bitmap("./Assets/SettingsScreen.png");
+    ALLEGRO_BITMAP* Tutorialbackground = al_load_bitmap("./Assets/TutorialScreen.png");
     ALLEGRO_BITMAP* question_bg = al_load_bitmap("./Assets/question.png");
     ALLEGRO_BITMAP* hud = al_load_bitmap("./Assets/hud.png");
     ALLEGRO_BITMAP* menu = al_load_bitmap("./Assets/menu.png");
@@ -88,6 +111,8 @@ int main() {
     al_register_event_source(EventQueue, al_get_keyboard_event_source());
     al_register_event_source(EventQueue, al_get_timer_event_source(Timer));
     al_register_event_source(EventQueue, al_get_timer_event_source(Countdown_timer));
+    al_register_event_source(EventQueue, al_get_mouse_event_source());
+
 
     srand(time(NULL));
     bool number_active = true;
@@ -111,123 +136,213 @@ int main() {
     bool key[4] = { false, false, false, false};
     bool cat_key[4] = { false, false, false, false};
     bool show_score_screen = false;
-    bool game_running = true;
-
+    
+    
     Question current_question = generate_question();
     int random_number = current_question.operand2;
 
+    initMusic();
+    playMusic();
     al_start_timer(Timer);
     al_start_timer(Countdown_timer);
-
-    while (game_running) {
+    while (game_running) 
+    {
         ALLEGRO_EVENT event;
         al_wait_for_event(EventQueue, &event);
+        
+        if (bIsMenu) {
+            bIsOptions = false;
+            if (event.type == ALLEGRO_EVENT_TIMER)
+            {
+                al_draw_bitmap(Menubackground, 0, 0, 0);
+                al_flip_display();
+            }
+            if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                bIsMenu = false;
+                game_running = false;
+            }
+            if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
+                    
+                    if (event.mouse.y >= 350 && event.mouse.y <= 430 && event.mouse.x >= 450 && event.mouse.x <= 750) {
+                        bIsMenu = false;
+                        bIsTutorial = true;
+                    }
 
-        if (event.type == ALLEGRO_EVENT_TIMER) {
-            cat_current_frame_y = 64 * 7;
-            current_frame_y = 64 * 6;
-            if (key[0] && PositionY >= BORDER_HEIGHT){
-                frame += 0.3f;
-                current_frame_y = 64 * 2;
-                PositionY -= 5;
-            }
-           if (key[1] && PositionY <= (SCREEN_HEIGHT - BORDER_HEIGHT) - 50) {
-                frame += 0.3f;
-                current_frame_y = 64 * 4;
-                PositionY += 5;
-           }
-            if (key[2] && PositionX >= BORDER_WIDTH) {
-                frame += 0.3f;
-                current_frame_y = 64 * 9;
-                PositionX -= 5;
-            }
-            if (key[3] && PositionX <= (SCREEN_WIDTH - BORDER_WIDTH) - 64) {
-                frame += 0.3f;
-                current_frame_y = 64 * 8;
-                PositionX += 5;
-            }
-            if (cat_key[0] && cat_position_y >= BORDER_HEIGHT) {
-                cat_frame += 0.3f;
-                cat_current_frame_y = 64 * 2;
-                cat_position_y -= 5;
-            }
-           if (cat_key[1] && cat_position_y <= (SCREEN_HEIGHT - BORDER_HEIGHT) - 56) {
-                cat_frame += 0.3f;
-                cat_current_frame_y = 0;
-                cat_position_y += 5;
-           }
-            if (cat_key[2] && cat_position_x >= BORDER_WIDTH) {
-                cat_frame += 0.3f;
-                cat_current_frame_y = 64 * 3;
-                cat_position_x -= 5;
-            }
-            if (cat_key[3] && cat_position_x <= (SCREEN_WIDTH - BORDER_WIDTH) - 64 ) {
-                cat_frame += 0.3f;
-                cat_current_frame_y = 64;
-                cat_position_x += 5;
-            }
+                    else if (event.mouse.y >= 450 && event.mouse.y <= 500 && event.mouse.x >= 450 && event.mouse.x <= 750) {
+                        bIsMenu = false;
+                        bIsOptions = true;
+                    }
+                    else if (event.mouse.y >= 530 && event.mouse.y <= 600 && event.mouse.x >= 450 && event.mouse.x <= 750) {
+                        game_running = false;
 
-            bool dog_collision = PositionX < number_x + 20 && PositionX + 64 > number_x && PositionY < number_y + 20 && PositionY + 64 > number_y;
-            bool cat_collision = cat_position_x < number_x + 20 && cat_position_x + 64 > number_x && cat_position_y < number_y + 20 && cat_position_y + 64 > number_y;
-            bool dog_collision2 = PositionX < number_x2 + 20 && PositionX + 64 > number_x2 && PositionY < number_y2 + 20 && PositionY + 72 > number_y2;
-            bool cat_collision2 = cat_position_x < number_x2 + 20 && cat_position_x + 64 > number_x2 && cat_position_y < number_y2 + 20 && cat_position_y + 64 > number_y2;
+                    }
+            }
+        }
+
+        if (bIsOptions) {
             
-            if (number_active && (dog_collision || cat_collision )) {
-                if (current_question.operand2 == random_number) {
-                    Score++;
-                    current_question = generate_question();
-                    random_number = rand() % 9 + 1;
-                    random_number2 = current_question.operand2;
-                    number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
-                    number_y2 = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
-                } else {
-                    if (Score > 0) {
-                        Score--;
-                    }
-                    current_question = generate_question();
-                    random_number2 = current_question.operand2;
-                    random_number = rand() % 9 + 1;
-                }
-                number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
-                number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+            if (event.type == ALLEGRO_EVENT_TIMER)
+            {
+                al_draw_bitmap(Optionsbackground, 0, 0, 0);
+                al_flip_display();
             }
-
-            if(number_active2 && (dog_collision2 || cat_collision2)) {
-                if (current_question.operand2 == random_number2) {
-                    Score++;
-                    current_question = generate_question();
-                    random_number2 = rand() % 9 + 1;
-                    random_number = current_question.operand2;
-                    number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
-                    number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
-                } else {
-                    if (Score > 0) {
-                        Score--;
-                    }
-                    current_question = generate_question();
-                    random_number = current_question.operand2;
-                    random_number2 = rand() % 9 + 1;
-                }
-                number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
-                number_y2 = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+            if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                bIsOptions = false;
+                game_running = false;
             }
-
-            if (event.timer.source == Countdown_timer) {
-                countdown_time--;
-                if (countdown_time <= 0) {
-                    al_stop_timer(Countdown_timer);
+            if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
+                
+                    if (event.mouse.y >= 530 && event.mouse.y <= 600 && event.mouse.x >= 450 && event.mouse.x <= 750) {
+                        bIsMenu = true;
+                        bIsOptions = false;
+                    }
+                    else if (event.mouse.y >= 330 && event.mouse.y <= 600 && event.mouse.x >= 150 && event.mouse.x <= 550)
+                    {
+                     
+                    }
+                    else if (event.mouse.y >= 300 && event.mouse.y <= 500 && event.mouse.x >= 700 && event.mouse.x <= 1000)
+                    {
+                        stopMusic();
+                        bIsPlaySound = false;
+                    }
+            }
+        }
+            if (bIsTutorial) 
+            {
+                bIsMenu = false;
+                if (event.type == ALLEGRO_EVENT_TIMER)
+                {
+                    al_draw_bitmap(Tutorialbackground, 100, 80, 0);
+                    al_flip_display();
+                }
+                if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    bIsTutorial = false;
                     game_running = false;
                 }
             }
+            if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
+                if (event.mouse.y >= 600 && event.mouse.y <= 700 && event.mouse.x >= 180 && event.mouse.x <= 400) {
+                    bIsTutorial = false;
+                    bIsMenu = false;
+                    bIsGame = true;
+                }
+                    
+            }
+            if(bIsGame) {
+            
 
-        }
+            if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                break;
+            }
 
-        else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-            break;
-        } 
-        
-        else if (event.type == ALLEGRO_EVENT_KEY_UP) { 
-            switch (event.keyboard.keycode) {
+            if (event.type == ALLEGRO_EVENT_TIMER) {
+                cat_current_frame_y = 64 * 7;
+                current_frame_y = 64 * 6;
+                if (key[0] && PositionY >= BORDER_HEIGHT) {
+                    frame += 0.3f;
+                    current_frame_y = 64 * 2;
+                    PositionY -= 5;
+                }
+                if (key[1] && PositionY <= (SCREEN_HEIGHT - BORDER_HEIGHT) - 50) {
+                    frame += 0.3f;
+                    current_frame_y = 64 * 4;
+                    PositionY += 5;
+                }
+                if (key[2] && PositionX >= BORDER_WIDTH) {
+                    frame += 0.3f;
+                    current_frame_y = 64 * 9;
+                    PositionX -= 5;
+                }
+                if (key[3] && PositionX <= (SCREEN_WIDTH - BORDER_WIDTH) - 64) {
+                    frame += 0.3f;
+                    current_frame_y = 64 * 8;
+                    PositionX += 5;
+                }
+                if (cat_key[0] && cat_position_y >= BORDER_HEIGHT) {
+                    cat_frame += 0.3f;
+                    cat_current_frame_y = 64 * 2;
+                    cat_position_y -= 5;
+                }
+                if (cat_key[1] && cat_position_y <= (SCREEN_HEIGHT - BORDER_HEIGHT) - 56) {
+                    cat_frame += 0.3f;
+                    cat_current_frame_y = 0;
+                    cat_position_y += 5;
+                }
+                if (cat_key[2] && cat_position_x >= BORDER_WIDTH) {
+                    cat_frame += 0.3f;
+                    cat_current_frame_y = 64 * 3;
+                    cat_position_x -= 5;
+                }
+                if (cat_key[3] && cat_position_x <= (SCREEN_WIDTH - BORDER_WIDTH) - 64) {
+                    cat_frame += 0.3f;
+                    cat_current_frame_y = 64;
+                    cat_position_x += 5;
+                }
+
+                bool dog_collision = PositionX < number_x + 20 && PositionX + 64 > number_x && PositionY < number_y + 20 && PositionY + 64 > number_y;
+                bool cat_collision = cat_position_x < number_x + 20 && cat_position_x + 64 > number_x && cat_position_y < number_y + 20 && cat_position_y + 64 > number_y;
+                bool dog_collision2 = PositionX < number_x2 + 20 && PositionX + 64 > number_x2 && PositionY < number_y2 + 20 && PositionY + 72 > number_y2;
+                bool cat_collision2 = cat_position_x < number_x2 + 20 && cat_position_x + 64 > number_x2 && cat_position_y < number_y2 + 20 && cat_position_y + 64 > number_y2;
+
+                if (number_active && (dog_collision || cat_collision)) {
+                    if (current_question.operand2 == random_number) {
+                        Score++;
+                        current_question = generate_question();
+                        random_number = rand() % 9 + 1;
+                        random_number2 = current_question.operand2;
+                        number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
+                        number_y2 = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+                    }
+                    else {
+                        if (Score > 0) {
+                            Score--;
+                        }
+                        current_question = generate_question();
+                        random_number2 = current_question.operand2;
+                        random_number = rand() % 9 + 1;
+                    }
+                    number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
+                    number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+                }
+
+                if (number_active2 && (dog_collision2 || cat_collision2)) {
+                    if (current_question.operand2 == random_number2) {
+                        Score++;
+                        current_question = generate_question();
+                        random_number2 = rand() % 9 + 1;
+                        random_number = current_question.operand2;
+                        number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
+                        number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+                    }
+                    else {
+                        if (Score > 0) {
+                            Score--;
+                        }
+                        current_question = generate_question();
+                        random_number = current_question.operand2;
+                        random_number2 = rand() % 9 + 1;
+                    }
+                    number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
+                    number_y2 = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
+                }
+
+                if (event.timer.source == Countdown_timer) {
+                    countdown_time--;
+                    if (countdown_time <= 0) {
+                        al_stop_timer(Countdown_timer);
+                        bIsGame = false;
+                        bIsEndGame = true;
+                    }
+                }
+
+            }
+
+            else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+                break;
+            }
+
+            else if (event.type == ALLEGRO_EVENT_KEY_UP) {
+                switch (event.keyboard.keycode) {
                 case ALLEGRO_KEY_W:
                     key[0] = false;
                     break;
@@ -252,10 +367,10 @@ int main() {
                 case ALLEGRO_KEY_L:
                     cat_key[3] = false;
                     break;
+                }
             }
-        }
-        else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {  
-            switch (event.keyboard.keycode) {
+            else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+                switch (event.keyboard.keycode) {
                 case ALLEGRO_KEY_W:
                     key[0] = true;
                     break;
@@ -280,79 +395,83 @@ int main() {
                 case ALLEGRO_KEY_L:
                     cat_key[3] = true;
                     break;
+                }
+
             }
-             
+
+            if (frame > 3) {
+                frame -= 3;
+            }
+
+            if (cat_frame > 3) {
+                cat_frame -= 3;
+            }
+
+            char question_text[50];
+            snprintf(question_text, sizeof(question_text), "%d %c ? = %d", current_question.operand1, current_question.operator, current_question.result);
+
+            snprintf(Score_Text, sizeof(Score_Text), "Score: %d", Score);
+            snprintf(Countdown_Text, sizeof(Countdown_Text), "Timer: %d", countdown_time);
+            al_clear_to_color(al_map_rgb(100, 100, 100));
+            al_draw_bitmap(Gamebackground, 0, 0, 0);
+            al_draw_bitmap(question_bg, 400, 730, 0);
+            al_draw_bitmap(hud, 20, 220, 0);
+            if (number_active) {
+                char number_text[2];
+                snprintf(number_text, sizeof(number_text), "%d", random_number);
+                al_draw_text(Font, al_map_rgb(255, 255, 255), number_x, number_y, ALLEGRO_ALIGN_CENTER, number_text);
+            }
+
+            if (number_active2) {
+                char number_text2[2];
+                snprintf(number_text2, sizeof(number_text2), "%d", random_number2);
+                al_draw_text(Font, al_map_rgb(255, 255, 255), number_x2, number_y2, ALLEGRO_ALIGN_CENTER, number_text2);
+            }
+            al_draw_text(Font, al_map_rgb(0, 0, 0), 650, 800, 0, question_text);
+            al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 270, 0, Score_Text);
+            al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 300, 0, Countdown_Text);
+            al_draw_bitmap_region(Sprite, 64 * (int)frame, current_frame_y, 64, 64, PositionX, PositionY, 0);
+            al_draw_bitmap_region(CatSprite, 64 * (int)cat_frame, cat_current_frame_y, 64, 64, cat_position_x, cat_position_y, 0);
+            // al_play_sample(Sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+            al_flip_display();
+            al_rest(0.01);
         }
 
-        if (frame > 3) {
-            frame -= 3;
-        }
+            if(bIsEndGame) {
+                
 
-        if (cat_frame > 3) {
-            cat_frame -= 3;
-        }
+                al_clear_to_color(al_map_rgb(0, 0, 0));
+                char score_text[50];
+                snprintf(score_text, sizeof(score_text), "Final Score: %d", Score);
+                al_draw_text(Font, al_map_rgb(255, 255, 255), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, ALLEGRO_ALIGN_CENTER, score_text);
+                al_draw_text(Font, al_map_rgb(255, 255, 255), 620, 100, ALLEGRO_ALIGN_CENTER, "Press ESC to close the game");
+                al_flip_display();
 
-        char question_text[50];
-        snprintf(question_text, sizeof(question_text), "%d %c ? = %d", current_question.operand1, current_question.operator, current_question.result);
-        
-        snprintf(Score_Text, sizeof(Score_Text), "Score: %d", Score);
-        snprintf(Countdown_Text, sizeof(Countdown_Text), "Timer: %d", countdown_time);
-        al_clear_to_color(al_map_rgb(100, 100, 100));
-        al_draw_bitmap(background, 0, 0, 0);
-        al_draw_bitmap(question_bg, 400, 730, 0);
-        al_draw_bitmap(hud, 20, 220, 0);
-        if (number_active) {
-            char number_text[2];
-            snprintf(number_text, sizeof(number_text), "%d", random_number);
-            al_draw_text(Font, al_map_rgb(255, 255, 255), number_x, number_y, ALLEGRO_ALIGN_CENTER, number_text); 
-        }
 
-        if (number_active2) {
-            char number_text2[2];
-            snprintf(number_text2, sizeof(number_text2), "%d", random_number2);
-            al_draw_text(Font, al_map_rgb(255, 255, 255), number_x2, number_y2, ALLEGRO_ALIGN_CENTER, number_text2); 
+                if (event.type = ALLEGRO_EVENT_KEY_DOWN) {
+                    if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+                        bIsMenu = true;
+                        bIsGame = false;
+                        bIsEndGame = false;
+                        bIsOptions = false;
+                    }
+                }
+                if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_R) {
+                    game_running = true;
+                    Score = 0;
+                    countdown_time = 60;
+                    al_start_timer(Countdown_timer);
+                }
         }
-        al_draw_text(Font, al_map_rgb(0, 0, 0), 650, 800, 0, question_text);
-        al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 270, 0, Score_Text);
-        al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 300, 0,  Countdown_Text);
-        al_draw_bitmap_region(Sprite, 64 * (int)frame, current_frame_y, 64, 64, PositionX, PositionY, 0);
-        al_draw_bitmap_region(CatSprite, 64 * (int)cat_frame, cat_current_frame_y, 64, 64, cat_position_x, cat_position_y, 0);
-        // al_play_sample(Sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
-        al_flip_display(); 
-        al_rest(0.01);
     }
-
-    while (!game_running) {
-        ALLEGRO_EVENT event;
-        al_wait_for_event(EventQueue, &event);
-
-        al_clear_to_color(al_map_rgb(0, 0, 0));
-        char score_text[50];
-        snprintf(score_text, sizeof(score_text), "Final Score: %d", Score);
-        al_draw_text(Font, al_map_rgb(255, 255, 255), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, ALLEGRO_ALIGN_CENTER, score_text);
-        al_draw_text(Font, al_map_rgb(255, 255, 255), 620, 100, ALLEGRO_ALIGN_CENTER, "Press ESC to close the game");
-        al_flip_display();
-
-        if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {  
-            break;
-        }
-
-        if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_R) {  
-            game_running = true;
-            Score = 0;
-            countdown_time = 60;
-            al_start_timer(Countdown_timer);
-        }
-    }
-
     al_destroy_display(Display);
     al_destroy_font(Font);
     al_destroy_event_queue(EventQueue);
     al_destroy_timer(Timer);
     al_destroy_bitmap(Sprite);
-    al_destroy_bitmap(background);
+    al_destroy_bitmap(Menubackground);
     al_destroy_bitmap(question_bg);
-    // al_destroy_sample(Sample);
+    al_destroy_sample(Sample);
 
     return 0;
 }
