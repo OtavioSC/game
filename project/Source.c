@@ -21,7 +21,7 @@ bool bIsMenu = true;
 bool bIsOptions = false;
 bool bIsPlaySound = true;
 bool bIsTutorial = false;
-int countdown_time = 2;
+int countdown_time = 45;
 
 ALLEGRO_SAMPLE *Sample = NULL;
 
@@ -59,6 +59,7 @@ void initMusic() {
   }
 }
 void playMusic() {
+  Sample = al_load_sample("./Assets/music/8bit.ogg");
   if (Sample && bIsPlaySound)
     al_play_sample(Sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
 }
@@ -196,13 +197,12 @@ int main() {
                    event.mouse.x >= 150 && event.mouse.x <= 550) {
                     if (!bIsPlaySound) {
                       bIsPlaySound = true;
-                      Sample = al_load_sample("./Assets/music/8bit.ogg");
-                      al_play_sample(Sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+                      playMusic();
                     }
         } else if (event.mouse.y >= 300 && event.mouse.y <= 500 &&
                    event.mouse.x >= 700 && event.mouse.x <= 1000) {
                     if (bIsPlaySound) {
-                        stopMusic();
+                        al_destroy_sample(Sample);
                         bIsPlaySound = false;
                     }
         }
