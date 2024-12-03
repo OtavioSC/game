@@ -21,7 +21,7 @@ bool bIsMenu = true;
 bool bIsOptions = false;
 bool bIsPlaySound = true;
 bool bIsTutorial = false;
-int countdown_time = 45;
+int countdown_time = 2;
 
 ALLEGRO_SAMPLE *Sample = NULL;
 
@@ -83,8 +83,7 @@ int main() {
   ALLEGRO_DISPLAY *Display = al_create_display(SCREEN_WIDTH, SCREEN_HEIGHT);
   al_set_window_position(Display, 200, 200);
 
-  ALLEGRO_FONT *Font =
-      al_load_font("./Assets/fonts/PixelOperator8-Bold.ttf", 21, 0);
+  ALLEGRO_FONT *Font = al_load_font("./Assets/fonts/PixelOperator8-Bold.ttf", 21, 0);
   // ALLEGRO_FONT* Font = al_create_builtin_font();
   ALLEGRO_TIMER *Timer = al_create_timer(1.0 / 25.0);
   ALLEGRO_TIMER *Countdown_timer = al_create_timer(1.0);
@@ -93,10 +92,9 @@ int main() {
   ALLEGRO_BITMAP *CatSprite = al_load_bitmap("./Assets/sprites/cat.png");
   ALLEGRO_BITMAP *Menubackground = al_load_bitmap("./Assets/MenuScreen.png");
   ALLEGRO_BITMAP *Gamebackground = al_load_bitmap("./Assets/background.png");
-  ALLEGRO_BITMAP *Optionsbackground =
-      al_load_bitmap("./Assets/SettingsScreen.png");
-  ALLEGRO_BITMAP *Tutorialbackground =
-      al_load_bitmap("./Assets/TutorialScreen.png");
+  ALLEGRO_BITMAP *Endscreen = al_load_bitmap("./Assets/EndScreen.png");
+  ALLEGRO_BITMAP *Optionsbackground = al_load_bitmap("./Assets/SettingsScreen.png");
+  ALLEGRO_BITMAP *Tutorialbackground = al_load_bitmap("./Assets/TutorialScreen.png");
   ALLEGRO_BITMAP *question_bg = al_load_bitmap("./Assets/question.png");
   ALLEGRO_BITMAP *hud = al_load_bitmap("./Assets/hud.png");
   ALLEGRO_BITMAP *menu = al_load_bitmap("./Assets/menu.png");
@@ -106,8 +104,7 @@ int main() {
   al_register_event_source(EventQueue, al_get_display_event_source(Display));
   al_register_event_source(EventQueue, al_get_keyboard_event_source());
   al_register_event_source(EventQueue, al_get_timer_event_source(Timer));
-  al_register_event_source(EventQueue,
-                           al_get_timer_event_source(Countdown_timer));
+  al_register_event_source(EventQueue, al_get_timer_event_source(Countdown_timer));
   al_register_event_source(EventQueue, al_get_mouse_event_source());
 
   srand(time(NULL));
@@ -233,7 +230,6 @@ int main() {
       }
     }
     if (bIsGame) {
-
       if (event.type == ALLEGRO_EVENT_KEY_DOWN &&
           event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
         break;
@@ -305,11 +301,8 @@ int main() {
             current_question = generate_question();
             random_number = rand() % 9 + 1;
             random_number2 = current_question.operand2;
-            number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) -
-                                                 64 - BORDER_WIDTH + 1);
-            number_y2 =
-                BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 -
-                                          BORDER_HEIGHT + 1);
+            number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
+            number_y2 = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
           } else {
             if (Score > 0) {
               Score--;
@@ -318,10 +311,8 @@ int main() {
             random_number2 = current_question.operand2;
             random_number = rand() % 9 + 1;
           }
-          number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) -
-                                              64 - BORDER_WIDTH + 1);
-          number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) -
-                                               25 - BORDER_HEIGHT + 1);
+          number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
+          number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
         }
 
         if (number_active2 && (dog_collision2 || cat_collision2)) {
@@ -330,11 +321,8 @@ int main() {
             current_question = generate_question();
             random_number2 = rand() % 9 + 1;
             random_number = current_question.operand2;
-            number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) -
-                                                64 - BORDER_WIDTH + 1);
-            number_y =
-                BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 -
-                                          BORDER_HEIGHT + 1);
+            number_x = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
+            number_y = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
           } else {
             if (Score > 0) {
               Score--;
@@ -343,11 +331,8 @@ int main() {
             random_number = current_question.operand2;
             random_number2 = rand() % 9 + 1;
           }
-          number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) -
-                                               64 - BORDER_WIDTH + 1);
-          number_y2 =
-              BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 -
-                                        BORDER_HEIGHT + 1);
+          number_x2 = BORDER_WIDTH + rand() % ((SCREEN_WIDTH - BORDER_WIDTH) - 64 - BORDER_WIDTH + 1);
+          number_y2 = BORDER_HEIGHT + rand() % ((SCREEN_HEIGHT - BORDER_HEIGHT) - 25 - BORDER_HEIGHT + 1);
         }
 
         if (event.timer.source == Countdown_timer) {
@@ -430,13 +415,9 @@ int main() {
       }
 
       char question_text[50];
-      snprintf(question_text, sizeof(question_text), "%d %c ? = %d",
-               current_question.operand1, current_question.operator,
-               current_question.result);
-
+      snprintf(question_text, sizeof(question_text), "%d %c ? = %d", current_question.operand1, current_question.operator, current_question.result);
       snprintf(Score_Text, sizeof(Score_Text), "Score: %d", Score);
-      snprintf(Countdown_Text, sizeof(Countdown_Text), "Timer: %d",
-               countdown_time);
+      snprintf(Countdown_Text, sizeof(Countdown_Text), "Timer: %d", countdown_time);
       al_clear_to_color(al_map_rgb(100, 100, 100));
       al_draw_bitmap(Gamebackground, 0, 0, 0);
       al_draw_bitmap(question_bg, 400, 730, 0);
@@ -444,39 +425,31 @@ int main() {
       if (number_active) {
         char number_text[2];
         snprintf(number_text, sizeof(number_text), "%d", random_number);
-        al_draw_text(Font, al_map_rgb(255, 255, 255), number_x, number_y,
-                     ALLEGRO_ALIGN_CENTER, number_text);
+        al_draw_text(Font, al_map_rgb(255, 255, 255), number_x, number_y, ALLEGRO_ALIGN_CENTER, number_text);
       }
 
       if (number_active2) {
         char number_text2[2];
         snprintf(number_text2, sizeof(number_text2), "%d", random_number2);
-        al_draw_text(Font, al_map_rgb(255, 255, 255), number_x2, number_y2,
-                     ALLEGRO_ALIGN_CENTER, number_text2);
+        al_draw_text(Font, al_map_rgb(255, 255, 255), number_x2, number_y2, ALLEGRO_ALIGN_CENTER, number_text2);
       }
       al_draw_text(Font, al_map_rgb(0, 0, 0), 650, 800, 0, question_text);
       al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 270, 0, Score_Text);
       al_draw_text(Font, al_map_rgb(0, 0, 0), 30, 300, 0, Countdown_Text);
-      al_draw_bitmap_region(Sprite, 64 * (int)frame, current_frame_y, 64, 64,
-                            PositionX, PositionY, 0);
-      al_draw_bitmap_region(CatSprite, 64 * (int)cat_frame, cat_current_frame_y,
-                            64, 64, cat_position_x, cat_position_y, 0);
-      // al_play_sample(Sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+      al_draw_bitmap_region(Sprite, 64 * (int)frame, current_frame_y, 64, 64, PositionX, PositionY, 0);
+      al_draw_bitmap_region(CatSprite, 64 * (int)cat_frame, cat_current_frame_y, 64, 64, cat_position_x, cat_position_y, 0);
       al_flip_display();
       al_rest(0.01);
     }
 
     if (bIsEndGame) {
-
       al_clear_to_color(al_map_rgb(0, 0, 0));
+      al_draw_bitmap(Endscreen, 0, 0, 0);
       char score_text[50];
       snprintf(score_text, sizeof(score_text), "Final Score: %d", Score);
-      al_draw_text(Font, al_map_rgb(255, 255, 255), SCREEN_WIDTH / 2,
-                   SCREEN_HEIGHT / 2, ALLEGRO_ALIGN_CENTER, score_text);
-      al_draw_text(Font, al_map_rgb(255, 255, 255), 620, 100,
-                   ALLEGRO_ALIGN_CENTER, "Press ESC to close the game");
-      al_draw_text(Font, al_map_rgb(255, 255, 255), 620, 150,
-                   ALLEGRO_ALIGN_CENTER, "Press Enter to restart the game");
+      al_draw_text(Font, al_map_rgb(255, 255, 255), 620, 430, ALLEGRO_ALIGN_CENTER, score_text);
+      al_draw_text(Font, al_map_rgb(255, 255, 255), 620, 600, ALLEGRO_ALIGN_CENTER, "ESC to close");
+      al_draw_text(Font, al_map_rgb(255, 255, 255), 620, 650, ALLEGRO_ALIGN_CENTER, "Enter to restart");
 
       al_flip_display();
 
